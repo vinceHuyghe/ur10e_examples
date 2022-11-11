@@ -1,0 +1,4 @@
+<launch>
+    <include file="$(find ur10e_moveit_config)/launch/demo.launch" />
+    <node name="trajectory_example" pkg="ur10e_examples" type="move_group_sequence_example.py" output="screen" />
+</launch>
