@@ -11,7 +11,7 @@ from pilz_robot_program.pilz_robot_program import Lin, Ptp, Sequence
 
 def robot_program():
 
-    home = (0.0, -pi / 2.0, pi / 2.0, 0.0, pi / 2.0, 0.0)
+    home = (0.0, -pi/2.0, pi/2.0, 0.0, pi/2.0, -pi/2)
 
     mgi = MoveGroupUtils()
     sequence = Sequence()
@@ -21,8 +21,15 @@ def robot_program():
     # create pose mgs list from yaml
     poses_list = poses_list_from_yaml(
         '/dev_ws/src/ur10e_examples/toolpaths/test.yaml')
+    # # alternative poses fro0m ros param server 
+    # if rospy.has_param('gh_poses'):
+    #     poses_list = rospy.get_param('gh_poses')
+    # else:
+    #     rospy.logerr('No poses found on ros param server')
+    #     return
 
     poses = [list_to_pose(pose) for pose in poses_list]
+    print(poses)
 
     # publish the poses to rviz for preview
     mgi.publish_pose_array(poses)
