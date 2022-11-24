@@ -1,26 +1,27 @@
 #!/usr/bin/env python3
 
-from math import pi
-
 import actionlib
 import rospy
-import trajectory_tools.msg
-from move_group_sequence.move_group_sequence import Circ, Lin, Ptp, from_euler
-from trajectory_tools.trajectory_handler import TrajectoryHandler
+import ur10e_examples.msg
+
+from move_group_utils.move_group_utils import MoveGroupUtils
+from pilz_robot_program.pilz_robot_program import Circ, Lin, Ptp
+
+# TODO adapt to sequence rather than single goal
 
 
 class GotoAction:
 
     # create messages that are used to publish feedback/result
-    _feedback = trajectory_tools.msg.GotoFeedback()
-    _result = trajectory_tools.msg.GotoResult()
+    _feedback = ur10e_examples.msg.GotoFeedback()
+    _result = ur10e_examples.msg.GotoResult()
 
     def __init__(self):
 
-        self._th = TrajectoryHandler()
+        self.mgi = MoveGroupUtils()
         self._as = actionlib.SimpleActionServer(
-            self._th.name,
-            trajectory_tools.msg.GotoAction,
+            self.mgi.name,
+            ur10e_examples.msg.GotoAction,
             execute_cb=self.execute_callback,
             auto_start=False,
         )
@@ -28,9 +29,9 @@ class GotoAction:
 
     def execute_callback(self, pose):
 
-        rospy.loginfo(f"{self._th.name}: exec_callback")
+        rospy.loginfo(f'{self.mgi.name}: exec_callback')
         # start executing the action
-        plan = self._th.sequencer.plan(
+        plan = self.mgi.sequencer.plan(
             Ptp(goal=pose.goal, vel_scale=0.3, acc_scale=0.3)
         )
         self._feedback.planning_succeeded = plan[0]
@@ -41,22 +42,22 @@ class GotoAction:
         # check that preempt has not been requested by the client
         # in this specific use case the preempt is not required, as
         # there is only one goal to execute. It is in this example for
-        # completeness 
+        # completeness
         if self._as.is_preempt_requested():
             self._as.set_preempted()
-            return rospy.loginfo(f"{self._th.name}: Action Preempted")
+            return rospy.loginfo(f'{self.mgi.name}: Action Preempted')
 
         # if execute returns None motion was executed
-        if not self._th.sequencer.execute():
+        if not self.mgi.sequencer.execute():
             self._result.goal_reached = True
             self._as.set_succeeded(self._result)
-            return rospy.loginfo(f"{self._th.name}: Action Succeeded")
+            return rospy.loginfo(f'{self.mgi.name}: Action Succeeded')
 
         else:
-            return rospy.loginfo(f"{self._th.name}: Action Failed")
+            return rospy.loginfo(f'{self.mgi.name}: Action Failed')
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
 
     GotoAction()
     rospy.spin()

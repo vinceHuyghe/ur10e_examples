@@ -4,20 +4,24 @@ from math import pi
 
 import rospy
 from geometry_msgs.msg import Point, Pose, Quaternion
-from move_group_sequence.move_group_sequence import Circ, Lin, Ptp, Sequence, from_euler
-from trajectory_tools.trajectory_handler import TrajectoryHandler
+
+from move_group_utils.move_group_utils import MoveGroupUtils
+from pilz_robot_program.pilz_robot_program import (Circ, Lin, Ptp, Sequence,
+                                                   from_euler)
 
 
 def robot_program():
 
-    th = TrajectoryHandler()
+    mgi = MoveGroupUtils()
 
-    th.sequencer.plan(Ptp(goal=th.start))
-    th.sequencer.execute()
+    home = (0.0, -pi / 2.0, pi / 2.0, 0.0, pi / 2.0, -pi / 2.0)
+
+    mgi.sequencer.plan(Ptp(goal=home))
+    mgi.sequencer.execute()
 
     sequence = Sequence()
 
-    sequence.append(Ptp(goal=th.start))
+    sequence.append(Ptp(goal=home))
     sequence.append(
         Ptp(
             goal=Pose(
@@ -85,13 +89,13 @@ def robot_program():
         )
     )
 
-    th.sequencer.plan(sequence)
+    success, plan = mgi.sequencer.plan(sequence)[:2]
 
-    th.display_trajectory()
+    mgi.display_trajectory(plan)
 
-    th.sequencer.execute()
+    mgi.sequencer.execute()
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
 
     robot_program()

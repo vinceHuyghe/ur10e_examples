@@ -1,0 +1,4 @@
+<launch>
+    <include file="$(find ur10e_moveit_config)/launch/demo.launch" />
+    <node name="sequence" pkg="ur10e_examples" type="sequence.py" output="screen" />
+</launch>

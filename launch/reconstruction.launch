@@ -1,6 +1,7 @@
 <launch>
     <!-- Moveit config -->
-    <!-- <include file="$(find ur10e_moveit_config)/launch/demo.launch" /> -->
+    <include file="$(find ur10e_moveit_config)/launch/demo.launch" />
+    <include file= "$(find move_group_utils)/launch/mgu_services.launch"/>   
     <!-- Tf publisher that links camera link to tool0 -->
     <node pkg="tf" type="static_transform_publisher" name="camera_link_broadcaster" args="0 0 0 0 -0.7071068 0 0.7071068 tool0 camera_link 100" />
     <!-- Realsense -->
@@ -18,5 +19,5 @@
         <arg name="camera_info_topic" value="/camera/color/camera_info" />
     </include>
     <!-- Moveit Commander -->
-    <!-- <node name="scanning_example" pkg="ur10e_examples" type="scanning_example.py" output="screen" /> -->
+    <node name="reconstruction" pkg="ur10e_examples" type="reconstruction.py" output="screen" />
 </launch>

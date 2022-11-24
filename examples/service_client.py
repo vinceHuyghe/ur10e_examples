@@ -1,0 +1,45 @@
+#!/usr/bin/env python3
+from math import pi
+
+import rospy
+from geometry_msgs.msg import Point, Pose, Quaternion
+
+from move_group_utils.move_group_utils import Lin, MoveGroupUtils
+from pilz_robot_program.pilz_robot_program import Lin, Ptp
+from ur10e_examples.srv import RandomPose
+
+
+def robot_program():
+
+    rospy.wait_for_service('/random_pose')
+    rospy.loginfo('Waiting for /random_pose service')
+
+    mgi = MoveGroupUtils()
+
+    home = (0.0, -pi / 2.0, pi / 2.0, 0.0, pi / 2.0, 0.0)
+
+    mgi.sequencer.plan(Ptp(goal=home))
+    mgi.sequencer.execute()
+
+    pose = Pose(position=Point(0.6, 0, 0.5),
+                orientation=Quaternion(0.0, 0.5, 0.0, 0.5))
+
+    mgi.sequencer.plan(Ptp(goal=pose))
+    mgi.sequencer.execute()
+
+    # Start client loop
+    random_offset = rospy.ServiceProxy('/random_pose', RandomPose)
+
+    while not rospy.is_shutdown():
+
+        resp = random_offset(pose)
+
+        mgi.publish_pose_array([resp.pose])
+
+        mgi.sequencer.plan(Lin(goal=resp.pose, vel_scale=0.3, acc_scale=0.1))
+        mgi.sequencer.execute()
+
+
+if __name__ == '__main__':
+
+    robot_program()

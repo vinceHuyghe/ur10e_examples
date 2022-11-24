@@ -1,3 +1,0 @@
-<launch>
-    <node name="sequencer_io_example" pkg="ur10e_examples" type="sequencer_io_example.py" output="screen"/>   
-</launch>

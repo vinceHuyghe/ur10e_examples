@@ -1,5 +1,0 @@
-<launch>
-    <include file="$(find ur10e_moveit_config)/launch/demo.launch"/>
-    <node name="goto_action_server_example" pkg="ur10e_examples" type="goto_action_server_example.py" output="screen"/>
-    <node name="goto_client" pkg="ur10e_examples" type="goto_client.py" output="screen"/>
-</launch>
