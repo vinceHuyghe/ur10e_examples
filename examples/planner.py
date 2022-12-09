@@ -11,8 +11,14 @@ from move_group_utils.move_group_utils import MoveGroupUtils
 
 def robot_program():
 
+    # initialize node and moveit commander
     mgi = MoveGroupUtils()
 
+    # wait for rviz and moveit to start
+    # (only required when using launch file)
+    rospy.sleep(3.0)
+
+    # define robot poses
     home = mgi.create_goal(
         [0.0, -pi / 2.0, pi / 2.0, 0.0, pi / 2.0, -pi / 2.0])
 
@@ -37,10 +43,10 @@ def robot_program():
     # set planner id, see {planner}_planning_pipeline.launch available options
     # mgi.move_group.set_planner_id('RRTConnect')
 
-    # plan to named position,
-    # see srdf and trajectory_handler for available options
+    # plan to home position
     mgi.move_group.set_joint_value_target(home)
     success, plan = mgi.move_group.plan()[:2]
+    # execute plan if planning was successful
     if success:
         mgi.move_group.execute(plan, wait=True)
     else:
@@ -50,20 +56,18 @@ def robot_program():
     for pose in poses:
         mgi.move_group.set_pose_target(pose)
         success, plan = mgi.move_group.plan()[:2]
-        if success:
-            mgi.move_group.execute(plan, wait=True)
-        else:
+        if not success:
             return rospy.loginfo(f'{mgi.name}: planning failed, robot program aborted')
+        mgi.move_group.execute(plan, wait=True)
 
     # plan to joint target
     mgi.move_group.set_joint_value_target(
         mgi.create_goal((0.0, -pi / 2.0, pi / 2.0, 0.0, pi / 2.0, -pi / 2))
     )
     success, plan = mgi.move_group.plan()[:2]
-    if success:
-        mgi.move_group.execute(plan, wait=True)
-    else:
+    if not success:
         return rospy.loginfo(f'{mgi.name}: planning failed, robot program aborted')
+    mgi.move_group.execute(plan, wait=True)
 
     # create collision object
     co_pose = PoseStamped()
@@ -82,15 +86,16 @@ def robot_program():
     box.dimensions = [1, 0.2, 0.5]
     co.primitives = [box]
 
+    # add collision object to planning scene
     mgi.add_collision_object(co)
 
+    # plan and execute to poses
     for pose in poses:
         mgi.move_group.set_pose_target(pose)
         success, plan = mgi.move_group.plan()[:2]
-        if success:
-            mgi.move_group.execute(plan, wait=True)
-        else:
+        if not success:
             return rospy.loginfo(f'{mgi.name}: planning failed, robot program aborted')
+        mgi.move_group.execute(plan, wait=True)
 
     return rospy.loginfo(f'{mgi.name}: robot program completed')
 

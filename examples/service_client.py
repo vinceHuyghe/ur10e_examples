@@ -11,8 +11,7 @@ from ur10e_examples.srv import RandomPose
 
 def robot_program():
 
-    rospy.wait_for_service('/random_pose')
-    rospy.loginfo('Waiting for /random_pose service')
+    rospy.wait_for_service('/random_pose', 30)
 
     mgi = MoveGroupUtils()
 

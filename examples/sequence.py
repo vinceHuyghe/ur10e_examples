@@ -11,16 +11,22 @@ from pilz_robot_program.pilz_robot_program import (Circ, Lin, Ptp, Sequence,
 
 
 def robot_program():
-
+    
+    # initialize node and moveit commander
     mgi = MoveGroupUtils()
 
+    # set and plan to home position
     home = (0.0, -pi / 2.0, pi / 2.0, 0.0, pi / 2.0, -pi / 2.0)
 
-    mgi.sequencer.plan(Ptp(goal=home))
+    success, plan = mgi.sequencer.plan(Ptp(goal=home))[:2]
+    if not success:
+        return rospy.logerr('Failed to plan to home position')
     mgi.sequencer.execute()
 
+    # initialize sequence
     sequence = Sequence()
 
+    # append commands to sequence
     sequence.append(Ptp(goal=home))
     sequence.append(
         Ptp(
@@ -93,7 +99,11 @@ def robot_program():
 
     mgi.display_trajectory(plan)
 
+    if not success:
+        return rospy.logerr('Failed to plan sequence')
     mgi.sequencer.execute()
+    
+    return rospy.loginfo('Robot program completed')
 
 
 if __name__ == '__main__':
