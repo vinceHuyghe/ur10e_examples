@@ -5,13 +5,14 @@ from math import pi
 import rospy
 from geometry_msgs.msg import Point, Pose, Quaternion
 
-from move_group_utils.move_group_utils import MoveGroupUtils
+from move_group_utils.move_group_utils import (MoveGroupUtils,
+                                               publish_trajectory_markers)
 from pilz_robot_program.pilz_robot_program import (Circ, Lin, Ptp, Sequence,
                                                    from_euler)
 
 
 def robot_program():
-    
+
     # initialize node and moveit commander
     mgi = MoveGroupUtils()
 
@@ -97,12 +98,14 @@ def robot_program():
 
     success, plan = mgi.sequencer.plan(sequence)[:2]
 
+    # visualize trajectory
+    publish_trajectory_markers(plan[0])
     mgi.display_trajectory(plan)
 
     if not success:
         return rospy.logerr('Failed to plan sequence')
     mgi.sequencer.execute()
-    
+
     return rospy.loginfo('Robot program completed')
 
 
