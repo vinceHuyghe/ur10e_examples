@@ -40,8 +40,8 @@ def robot_program():
 
     ee_name = 'D405'
 
-    rospy.wait_for_service('/start_reconstruction')
-    rospy.loginfo('robot program: waiting for /start_reconstruction srv')
+    rospy.wait_for_service('/start_reconstruction', timeout=10.0)
+
     start_recon = rospy.ServiceProxy(
         '/start_reconstruction', StartReconstruction)
     stop_recon = rospy.ServiceProxy('/stop_reconstruction', StopReconstruction)
