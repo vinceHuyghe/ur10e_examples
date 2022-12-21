@@ -51,6 +51,12 @@ def robot_program():
     mgi = MoveGroupUtils()
     rospy.sleep(3)
 
+    rospy.wait_for_service(
+        '/industrial_reconstruction/start_reconstruction', timeout=10)
+    start_recon = rospy.ServiceProxy(
+        '/start_reconstruction', StartReconstruction)
+    stop_recon = rospy.ServiceProxy('/stop_reconstruction', StopReconstruction)
+
     mgi.attach_camera(ee_name, tcp_pose, size)
     mgi.move_group.set_end_effector_link(f'{ee_name}/tcp')
 
@@ -60,13 +66,13 @@ def robot_program():
     # move home
     success, plan = mgi.sequencer.plan(Ptp(goal=home))[:2]
     if not success:
-        return rospy.logerr('Failed to plan to home position')
+        return rospy.logerr('robot program: failed to plan to home position')
     mgi.sequencer.execute(plan)
 
     # move approach
     success, plan = mgi.sequencer.plan(Ptp(goal=toolpath[0]))[:2]
     if not success:
-        return rospy.logerr('Failed to plan to approach position')
+        return rospy.logerr('robot program: failed to plan to approach position')
     mgi.sequencer.execute(plan)
 
     # scanning sequence
@@ -81,11 +87,21 @@ def robot_program():
 
     success, plan = mgi.sequencer.plan(sequence)[:2]
     if not success:
-        return rospy.logerr('Failed to plan to sequence')
+        return rospy.logerr('robot program: failed to plan to sequence')
     publish_trajectory_markers(plan[0])
     # start reconstruction
+    resp = start_recon(start_srv_req)
+    if not resp:
+        rospy.loginfo('robot program: failed to start reconstruction')
+    rospy.loginfo('robot program: started reconstruction')
 
     mgi.sequencer.execute(plan)
+
+    # stop reconstruction
+    resp = stop_recon(stop_srv_req)
+    if not resp:
+        rospy.loginfo('robot program: failed to stop reconstruction')
+    rospy.loginfo('robot program: reconstruction stopped successfully')
 
     # return home
     success, plan = mgi.sequencer.plan(Ptp(goal=home))[:2]
@@ -93,7 +109,7 @@ def robot_program():
         return rospy.logerr('Failed to plan to home position')
     mgi.sequencer.execute(plan)
 
-    return rospy.loginfo('robot program completed')
+    return rospy.loginfo('robot program: program completed')
 
 
 if __name__ == '__main__':
