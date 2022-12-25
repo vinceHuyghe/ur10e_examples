@@ -1,8 +1,8 @@
 #goal definition
-geometry_msgs/Pose goal
+geometry_msgs/Pose[] poses
 ---
 #result definition
-bool goal_reached
+bool sequence_completed
 ---
 #feedback
 bool planning_succeeded

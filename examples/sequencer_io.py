@@ -12,6 +12,13 @@ from pilz_robot_program.pilz_robot_program import (Circ, Lin, Ptp, Sequence,
 
 # TODO test on HW
 
+# define robot poses
+start = (0.0, -pi / 2.0, pi / 2.0, 0.0, pi / 2.0, 0.0)
+pose_l = Pose(position=Point(0.8, -0.6, 0.4),
+              orientation=from_euler(0.0, pi, 0.0))
+pose_r = Pose(position=Point(0.8, 0.6, 0.4),
+              orientation=from_euler(0.0, pi, 0.0))
+
 
 def robot_program():
 
@@ -21,19 +28,14 @@ def robot_program():
     rospy.wait_for_service('ur_hardware_interface/set_io', 30)
     set_io = rospy.ServiceProxy('ur_hardware_interface/set_io', SetIO)
 
-    start = (0.0, -pi / 2.0, pi / 2.0, 0.0, pi / 2.0, 0.0)
-    pose_l = Pose(position=Point(0.8, -0.6, 0.4),
-                  orientation=from_euler(0.0, pi, 0.0))
-    pose_r = Pose(position=Point(0.8, 0.6, 0.4),
-                  orientation=from_euler(0.0, pi, 0.0))
-
     success, plan = mgi.sequencer.plan(
         Ptp(goal=start, vel_scale=0.3, acc_scale=0.3))[:2]
     if not success:
         return rospy.logerr('Failed to plan to start position')
     mgi.sequencer.execute(plan)
 
-    success, plan = mgi.sequencer.plan(Ptp(goal=pose_l, vel_scale=0.3, acc_scale=0.3))[:2]
+    success, plan = mgi.sequencer.plan(
+        Ptp(goal=pose_l, vel_scale=0.3, acc_scale=0.3))[:2]
     if not success:
         return rospy.logerr('Failed to plan to pose_l')
     mgi.sequencer.execute(plan)
@@ -41,14 +43,15 @@ def robot_program():
     # set DO0 to 1 (ON)
     set_io(1, 0, 1)
 
-    success, plan = mgi.sequencer.plan(Ptp(goal=pose_r, vel_scale=0.3, acc_scale=0.3))[:2]
+    success, plan = mgi.sequencer.plan(
+        Ptp(goal=pose_r, vel_scale=0.3, acc_scale=0.3))[:2]
     if not success:
         return rospy.logerr('Failed to plan to pose_r')
     mgi.sequencer.execute(plan)
 
     # set DO0 to 0 (OFF)
     set_io(1, 0, 0)
-    
+
     return rospy.loginfo('Robot program completed')
 
 

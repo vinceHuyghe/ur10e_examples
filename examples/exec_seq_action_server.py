@@ -1,20 +1,22 @@
 #!/usr/bin/env python3
 
+from math import pi
 import actionlib
 import rospy
 import ur10e_examples.msg
 
-from move_group_utils.move_group_utils import MoveGroupUtils
-from pilz_robot_program.pilz_robot_program import Circ, Lin, Ptp
+from move_group_utils.move_group_utils import (MoveGroupUtils,
+                                               publish_trajectory_markers)
+from pilz_robot_program.pilz_robot_program import Circ, Lin, Ptp, Sequence
 
-# TODO adapt to sequence rather than single goal
+home = (0.0, -pi/2.0, pi/2.0, -pi, -pi/2, 0)
 
 
-class GotoAction:
+class ExecSeq:
 
     # create messages that are used to publish feedback/result
-    _feedback = ur10e_examples.msg.GotoFeedback()
-    _result = ur10e_examples.msg.GotoResult()
+    _feedback = ur10e_examples.msg.ExecSeqFeedback()
+    _result = ur10e_examples.msg.ExecSeqResult()
 
     def __init__(self):
 
@@ -27,14 +29,24 @@ class GotoAction:
         )
         self._as.start()
 
-    def execute_callback(self, pose):
+    def execute_callback(self, poses):
 
         rospy.loginfo(f'{self.mgi.name}: exec_callback')
+
+        sequence = Sequence()
+
+        sequence.append(Ptp(goal=home))
+
         # start executing the action
-        plan = self.mgi.sequencer.plan(
-            Ptp(goal=pose.goal, vel_scale=0.3, acc_scale=0.3)
-        )
-        self._feedback.planning_succeeded = plan[0]
+        for p in poses.poses:
+            sequence.append(Lin(goal=p))
+
+        success, plan = self.mgi.sequencer.plan(sequence)[:2]
+
+        self.mgi.display_trajectory(plan)
+        publish_trajectory_markers(plan[0])
+
+        self._feedback.planning_succeeded = success
 
         # publish the feedback
         self._as.publish_feedback(self._feedback)
@@ -49,15 +61,14 @@ class GotoAction:
 
         # if execute returns None motion was executed
         if not self.mgi.sequencer.execute():
-            self._result.goal_reached = True
+            self._result.sequence_completed = True
             self._as.set_succeeded(self._result)
             return rospy.loginfo(f'{self.mgi.name}: Action Succeeded')
 
-        else:
-            return rospy.loginfo(f'{self.mgi.name}: Action Failed')
+        return rospy.loginfo(f'{self.mgi.name}: Action Failed')
 
 
 if __name__ == '__main__':
 
-    GotoAction()
+    ExecSeq()
     rospy.spin()

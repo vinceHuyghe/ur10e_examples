@@ -6,7 +6,7 @@ import rospy
 from ur10e_examples.srv import RandomPose
 
 
-class RandomPoseSrv(object):
+class RandomPoseSrv():
 
     def __init__(self, name) -> None:
 

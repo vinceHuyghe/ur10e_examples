@@ -35,10 +35,21 @@ stop_srv_req.mesh_filepath = '/home/v/test.ply'
 #                     normal_direction=Vector3(x=0.0, y=0.0, z=1.0), angle=90)]
 # stop_srv_req.min_num_faces = 1000
 
+# define robot poses
+home = (0.0, -pi/2.0, pi/2.0, -pi, -pi/2, 0)
+pose1 = Pose(position=Point(0.6, -0.5, 0.15),
+             orientation=Quaternion(0.0, 1.0, 0.0, 0.0))
+pose2 = Pose(position=Point(0.6, 0.5, 0.15),
+             orientation=Quaternion(0.0, 1.0, 0.0, 0.0))
+
+# define endeffector
+ee_name = 'D405'
+tcp_pose = Pose(position=Point(0.0, 0.0, 0.001),
+                orientation=Quaternion(0, 0, 0, 1))
+size = [0.042, 0.042, 0.023]
+
 
 def robot_program():
-
-    ee_name = 'D405'
 
     rospy.wait_for_service('/start_reconstruction', timeout=10.0)
 
@@ -46,26 +57,18 @@ def robot_program():
         '/start_reconstruction', StartReconstruction)
     stop_recon = rospy.ServiceProxy('/stop_reconstruction', StopReconstruction)
 
-    start = (0.0, -pi / 2.0, pi / 2.0, 0.0, pi / 2.0, 0.0)
-    pose1 = Pose(
-        position=Point(0.6, -0.5, 0.15), orientation=Quaternion(0.0, 1.0, 0.0, 0.0)
-    )
-    pose2 = Pose(
-        position=Point(0.6, 0.5, 0.15), orientation=Quaternion(0.0, 1.0, 0.0, 0.0)
-    )
-
     mgi = MoveGroupUtils()
     mgi.publish_pose_array([pose1, pose2])
 
     # attach camera and set new tcp
-    mgi.attach_camera(ee_name)
+    mgi.attach_camera(ee_name, tcp_pose, size)
     mgi.move_group.set_end_effector_link(f'{ee_name}/tcp')
     rospy.loginfo(
         f'{mgi.name}: end effector link set to {mgi.move_group.get_end_effector_link()}'
     )
 
     # Move into position to start reconstruction
-    mgi.sequencer.plan(Ptp(goal=start, vel_scale=0.1, acc_scale=0.3))
+    mgi.sequencer.plan(Ptp(goal=home, vel_scale=0.1, acc_scale=0.3))
     mgi.sequencer.execute()
     mgi.sequencer.plan(Ptp(goal=pose1, vel_scale=0.1, acc_scale=0.3))
     mgi.sequencer.execute()

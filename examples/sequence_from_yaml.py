@@ -10,11 +10,14 @@ from move_group_utils.move_group_utils import (MoveGroupUtils,
 from pilz_robot_program.pilz_robot_program import Lin, Ptp, Sequence
 
 
+home = (0.0, -pi/2.0, pi/2.0, 0.0, pi/2.0, -pi/2)
+
+
 def robot_program():
 
-    home = (0.0, -pi/2.0, pi/2.0, 0.0, pi/2.0, -pi/2)
-
     mgi = MoveGroupUtils()
+    rospy.sleep(3.0)
+
     sequence = Sequence()
 
     sequence.append(Ptp(goal=home))
@@ -46,6 +49,8 @@ def robot_program():
     if not success:
         return rospy.logerr(f'{mgi.name}: Failed to plan to sequence')
     mgi.sequencer.execute()
+
+    return rospy.loginfo('Robot program completed')
 
 
 if __name__ == '__main__':

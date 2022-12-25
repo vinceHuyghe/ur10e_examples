@@ -67,7 +67,7 @@ add_service_files(
 add_action_files(
   DIRECTORY action
   FILES
-  Goto.action
+  ExecSeq.action
 )
 
 ## Generate added messages and services with any dependencies listed here
@@ -179,8 +179,8 @@ catkin_install_python(
   examples/planner.py
   examples/service_client.py
   examples/random_pose_service.py
-  examples/goto_action_server.py
-  examples/goto_action_client.py
+  examples/exec_seq_action_server.py
+  examples/exec_seq_action_client.py
   examples/sequence_from_yaml.py
   examples/sequencer_io.py
   examples/subframe.py

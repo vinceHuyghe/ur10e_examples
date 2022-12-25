@@ -8,6 +8,19 @@ from shape_msgs.msg import SolidPrimitive
 from std_msgs.msg import Header
 from move_group_utils.move_group_utils import MoveGroupUtils
 
+# define poses
+
+pose0 = Pose(
+    position=Point(0.8, -0.6, 0.3),
+    orientation=Quaternion(0.0, 1.0, 0.0, 0.0)
+)
+pose1 = Pose(
+    position=Point(0.8, 0.6, 0.3),
+    orientation=Quaternion(0.0, 1.0, 0.0, 0.0)
+)
+
+poses = [pose0, pose1]
+
 
 def robot_program():
 
@@ -22,16 +35,6 @@ def robot_program():
     home = mgi.create_goal(
         [0.0, -pi / 2.0, pi / 2.0, 0.0, pi / 2.0, -pi / 2.0])
 
-    pose0 = Pose(
-        position=Point(0.8, -0.6, 0.3),
-        orientation=Quaternion(0.0, 1.0, 0.0, 0.0)
-    )
-    pose1 = Pose(
-        position=Point(0.8, 0.6, 0.3),
-        orientation=Quaternion(0.0, 1.0, 0.0, 0.0)
-    )
-
-    poses = [pose0, pose1]
 
     # display pose markers in rviz
     mgi.publish_pose_array(poses)
@@ -46,6 +49,7 @@ def robot_program():
     # plan to home position
     mgi.move_group.set_joint_value_target(home)
     success, plan = mgi.move_group.plan()[:2]
+    
     # execute plan if planning was successful
     if success:
         mgi.move_group.execute(plan, wait=True)

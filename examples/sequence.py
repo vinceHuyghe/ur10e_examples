@@ -7,8 +7,7 @@ from geometry_msgs.msg import Point, Pose, Quaternion
 
 from move_group_utils.move_group_utils import (MoveGroupUtils,
                                                publish_trajectory_markers)
-from pilz_robot_program.pilz_robot_program import (Circ, Lin, Ptp, Sequence,
-                                                   from_euler)
+from pilz_robot_program.pilz_robot_program import (Circ, Lin, Ptp, Sequence)
 
 
 def robot_program():

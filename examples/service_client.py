@@ -4,7 +4,8 @@ from math import pi
 import rospy
 from geometry_msgs.msg import Point, Pose, Quaternion
 
-from move_group_utils.move_group_utils import Lin, MoveGroupUtils
+from move_group_utils.move_group_utils import (MoveGroupUtils,
+                                               publish_trajectory_markers)
 from pilz_robot_program.pilz_robot_program import Lin, Ptp
 from ur10e_examples.srv import RandomPose
 
@@ -35,7 +36,10 @@ def robot_program():
 
         mgi.publish_pose_array([resp.pose])
 
-        mgi.sequencer.plan(Lin(goal=resp.pose, vel_scale=0.3, acc_scale=0.1))
+        success, plan = mgi.sequencer.plan(Lin(goal=resp.pose,
+                                               vel_scale=0.3,
+                                               acc_scale=0.1))[:2]
+        publish_trajectory_markers(plan[0])
         mgi.sequencer.execute()
 
 

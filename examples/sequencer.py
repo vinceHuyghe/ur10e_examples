@@ -9,6 +9,15 @@ from move_group_utils.move_group_utils import MoveGroupUtils
 from pilz_robot_program.pilz_robot_program import (Circ, Lin, Ptp, Sequence,
                                                    from_euler)
 
+# define robot poses
+home = (0.0, -pi / 2.0, pi / 2.0, 0.0, pi / 2.0, -pi / 2.0)
+pose_l = Pose(position=Point(0.6, -0.6, 0.4),
+              orientation=from_euler(0.0, pi, 0.0))
+pose_r = Pose(position=Point(0.6, 0.6, 0.4),
+              orientation=from_euler(0.0, pi, 0.0))
+
+poses = [home, pose_l, pose_r]
+
 
 def robot_program():
 
@@ -18,15 +27,6 @@ def robot_program():
     # wait for rviz and moveit to start
     # (only required when using launch file)
     rospy.sleep(3.0)
-
-    # define robot poses
-    home = (0.0, -pi / 2.0, pi / 2.0, 0.0, pi / 2.0, -pi / 2.0)
-    pose_l = Pose(position=Point(0.6, -0.6, 0.4),
-                  orientation=from_euler(0.0, pi, 0.0))
-    pose_r = Pose(position=Point(0.6, 0.6, 0.4),
-                  orientation=from_euler(0.0, pi, 0.0))
-
-    poses = [home, pose_l, pose_r]
 
     # display pose markers in rviz
     mgi.publish_pose_array([pose_l, pose_r])

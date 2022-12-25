@@ -89,6 +89,7 @@ def robot_program():
     if not success:
         return rospy.logerr('robot program: failed to plan to sequence')
     publish_trajectory_markers(plan[0])
+
     # start reconstruction
     resp = start_recon(start_srv_req)
     if not resp:
