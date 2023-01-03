@@ -37,9 +37,9 @@ stop_srv_req.mesh_filepath = '/home/v/test.ply'
 
 # define robot poses
 home = (0.0, -pi/2.0, pi/2.0, -pi, -pi/2, 0)
-pose1 = Pose(position=Point(0.6, -0.5, 0.15),
+pose1 = Pose(position=Point(0.6, -0.3, 0.15),
              orientation=Quaternion(0.0, 1.0, 0.0, 0.0))
-pose2 = Pose(position=Point(0.6, 0.5, 0.15),
+pose2 = Pose(position=Point(0.6, 0.3, 0.15),
              orientation=Quaternion(0.0, 1.0, 0.0, 0.0))
 
 # define endeffector

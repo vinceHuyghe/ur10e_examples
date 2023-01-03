@@ -185,6 +185,7 @@ catkin_install_python(
   examples/sequencer_io.py
   examples/subframe.py
   examples/reconstruction.py
+  examples/scanning_sequence.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

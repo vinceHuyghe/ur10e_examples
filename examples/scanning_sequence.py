@@ -18,7 +18,7 @@ from pilz_robot_program.pilz_robot_program import Lin, Ptp, Sequence
 home = (0.0, -pi/2.0, pi/2.0, -pi, -pi/2, 0)
 
 pose_list = poses_list_from_yaml(
-    '/dev_ws/src/ur10e_examples/toolpaths/test.yaml')
+    '/dev_ws/src/ur10e_examples/toolpaths/scanning.yaml')
 toolpath = [list_to_pose(pose) for pose in pose_list]
 
 # define end effector
@@ -33,17 +33,28 @@ start_srv_req.tracking_frame = 'tool0'
 start_srv_req.relative_frame = 'base_link'
 start_srv_req.translation_distance = 0.0
 start_srv_req.rotational_distance = 0.0
-start_srv_req.live = True
-start_srv_req.tsdf_params.voxel_length = 0.001
-start_srv_req.tsdf_params.sdf_trunc = 0.002
+start_srv_req.live = False
+start_srv_req.tsdf_params.voxel_length = 0.0005
+start_srv_req.tsdf_params.sdf_trunc = 0.001
+# start_srv_req.live = True
+# start_srv_req.tsdf_params.voxel_length = 0.001
+# start_srv_req.tsdf_params.sdf_trunc = 0.002
 start_srv_req.tsdf_params.min_box_values = Vector3(x=0.0, y=0.0, z=0.0)
 start_srv_req.tsdf_params.max_box_values = Vector3(x=0.0, y=0.0, z=0.0)
 start_srv_req.rgbd_params.depth_scale = 1000
-start_srv_req.rgbd_params.depth_trunc = 0.25
+start_srv_req.rgbd_params.depth_trunc = 0.15
 start_srv_req.rgbd_params.convert_rgb_to_intensity = False
 
 stop_srv_req = StopReconstructionRequest()
 stop_srv_req.mesh_filepath = '/home/v/test.ply'
+
+# define speed and acceleration
+
+move_vel = 0.5
+move_acc = 0.5
+
+scan_vel = 0.0005
+scan_acc = 0.0005
 
 
 def robot_program():
@@ -51,8 +62,7 @@ def robot_program():
     mgi = MoveGroupUtils()
     rospy.sleep(3)
 
-    rospy.wait_for_service(
-        '/industrial_reconstruction/start_reconstruction', timeout=10)
+    rospy.wait_for_service('/start_reconstruction', timeout=10)
     start_recon = rospy.ServiceProxy(
         '/start_reconstruction', StartReconstruction)
     stop_recon = rospy.ServiceProxy('/stop_reconstruction', StopReconstruction)
@@ -64,13 +74,17 @@ def robot_program():
     mgi.publish_pose_array(toolpath)
 
     # move home
-    success, plan = mgi.sequencer.plan(Ptp(goal=home))[:2]
+    success, plan = mgi.sequencer.plan(Ptp(goal=home,
+                                       vel_scale=move_vel,
+                                       acc_scale=move_acc))[:2]
     if not success:
         return rospy.logerr('robot program: failed to plan to home position')
     mgi.sequencer.execute(plan)
 
     # move approach
-    success, plan = mgi.sequencer.plan(Ptp(goal=toolpath[0]))[:2]
+    success, plan = mgi.sequencer.plan(Ptp(goal=toolpath[0],
+                                       vel_scale=move_vel,
+                                       acc_scale=move_acc))[:2]
     if not success:
         return rospy.logerr('robot program: failed to plan to approach position')
     mgi.sequencer.execute(plan)
@@ -79,11 +93,13 @@ def robot_program():
     sequence = Sequence()
     for pose in toolpath[1:-1]:
         sequence.append(Lin(goal=pose,
-                            vel_scale=0.2,
-                            acc_scale=0.2),
-                        blend_radius=0.005)
+                            vel_scale=scan_vel,
+                            acc_scale=scan_acc),
+                        blend_radius=0.01)
 
-    sequence.append(Lin(goal=toolpath[-1], vel_scale=0.2, acc_scale=0.2))
+    sequence.append(Lin(goal=toolpath[-1],
+                    vel_scale=scan_vel,
+                    acc_scale=scan_acc))
 
     success, plan = mgi.sequencer.plan(sequence)[:2]
     if not success:
@@ -105,7 +121,8 @@ def robot_program():
     rospy.loginfo('robot program: reconstruction stopped successfully')
 
     # return home
-    success, plan = mgi.sequencer.plan(Ptp(goal=home))[:2]
+    success, plan = mgi.sequencer.plan(
+        Ptp(goal=home, vel_scale=move_vel, acc_scale=move_acc))[:2]
     if not success:
         return rospy.logerr('Failed to plan to home position')
     mgi.sequencer.execute(plan)
