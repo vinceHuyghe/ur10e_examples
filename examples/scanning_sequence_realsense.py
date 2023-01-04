@@ -31,7 +31,7 @@ size = [0.042, 0.042, 0.023]
 start_srv_req = StartReconstructionRequest()
 start_srv_req.tracking_frame = 'tool0'
 start_srv_req.relative_frame = 'base_link'
-start_srv_req.translation_distance = 0.0
+start_srv_req.translation_distance = 0.001
 start_srv_req.rotational_distance = 0.0
 start_srv_req.live = False
 start_srv_req.tsdf_params.voxel_length = 0.0005
@@ -53,8 +53,8 @@ stop_srv_req.mesh_filepath = '/home/v/test.ply'
 move_vel = 0.5
 move_acc = 0.5
 
-scan_vel = 0.0005
-scan_acc = 0.0005
+scan_vel = 0.05
+scan_acc = 0.0002
 
 
 def robot_program():
