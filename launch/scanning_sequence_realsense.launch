@@ -5,11 +5,11 @@
     <!-- Tf publisher that links camera link to tool0 -->
     <node pkg="tf" type="static_transform_publisher" name="camera_link_broadcaster" args="0 0 0 0 -0.7071068 0 0.7071068 tool0 camera_link 100" />
     <!-- Realsense -->
-    <include file="$(find realsense2_camera)/launch/rs_rgbd.launch">
+    <include file="$(find realsense2_camera)/launch/rs_camera.launch">
         <!-- <arg name="enable_pointcloud" value="false" /> -->
         <!-- <arg name="ordered_pc" value="true" /> -->
         <!-- <arg name="filters" value="pointcloud" /> -->
-        <!-- <arg name="clip_distance" value="0.2" /> -->
+        <arg name="clip_distance" value="0.15" />
         <arg name='enable_depth' value='true' /> 
     </include>
         <!-- Reconstruction -->

@@ -18,7 +18,7 @@ from pilz_robot_program.pilz_robot_program import Lin, Ptp, Sequence
 home = (0.0, -pi/2.0, pi/2.0, -pi, -pi/2, 0)
 
 pose_list = poses_list_from_yaml(
-    '/dev_ws/src/ur10e_examples/toolpaths/scanning.yaml')
+    '/dev_ws/src/ur10e_examples/toolpaths/scan.yaml')
 toolpath = [list_to_pose(pose) for pose in pose_list]
 
 # define end effector
@@ -33,12 +33,12 @@ start_srv_req.tracking_frame = 'tool0'
 start_srv_req.relative_frame = 'base_link'
 start_srv_req.translation_distance = 0.001
 start_srv_req.rotational_distance = 0.0
+# start_srv_req.live = False
+# start_srv_req.tsdf_params.voxel_length = 0.0005
+# start_srv_req.tsdf_params.sdf_trunc = 0.001
 start_srv_req.live = False
-start_srv_req.tsdf_params.voxel_length = 0.0005
-start_srv_req.tsdf_params.sdf_trunc = 0.001
-# start_srv_req.live = True
-# start_srv_req.tsdf_params.voxel_length = 0.001
-# start_srv_req.tsdf_params.sdf_trunc = 0.002
+start_srv_req.tsdf_params.voxel_length = 0.001
+start_srv_req.tsdf_params.sdf_trunc = 0.002
 start_srv_req.tsdf_params.min_box_values = Vector3(x=0.0, y=0.0, z=0.0)
 start_srv_req.tsdf_params.max_box_values = Vector3(x=0.0, y=0.0, z=0.0)
 start_srv_req.rgbd_params.depth_scale = 1000
@@ -53,8 +53,13 @@ stop_srv_req.mesh_filepath = '/home/v/test.ply'
 move_vel = 0.5
 move_acc = 0.5
 
+# fine scan
+# scan_vel = 0.05
+# scan_acc = 0.0002
+
+# fast scan
 scan_vel = 0.05
-scan_acc = 0.0002
+scan_acc = 0.001
 
 
 def robot_program():
