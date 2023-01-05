@@ -31,7 +31,7 @@ size = [0.042, 0.042, 0.023]
 start_srv_req = StartReconstructionRequest()
 start_srv_req.tracking_frame = 'tool0'
 start_srv_req.relative_frame = 'base_link'
-start_srv_req.translation_distance = 0.001
+start_srv_req.translation_distance = 0.0
 start_srv_req.rotational_distance = 0.0
 # start_srv_req.live = False
 # start_srv_req.tsdf_params.voxel_length = 0.0005
@@ -62,15 +62,20 @@ scan_vel = 0.05
 scan_acc = 0.001
 
 
+scan = True
+
+
 def robot_program():
 
     mgi = MoveGroupUtils()
     rospy.sleep(3)
 
-    rospy.wait_for_service('/start_reconstruction', timeout=10)
-    start_recon = rospy.ServiceProxy(
-        '/start_reconstruction', StartReconstruction)
-    stop_recon = rospy.ServiceProxy('/stop_reconstruction', StopReconstruction)
+    if scan:
+        rospy.wait_for_service('/start_reconstruction', timeout=10)
+        start_recon = rospy.ServiceProxy(
+            '/start_reconstruction', StartReconstruction)
+        stop_recon = rospy.ServiceProxy(
+            '/stop_reconstruction', StopReconstruction)
 
     mgi.attach_camera(ee_name, tcp_pose, size)
     mgi.move_group.set_end_effector_link(f'{ee_name}/tcp')
@@ -111,19 +116,21 @@ def robot_program():
         return rospy.logerr('robot program: failed to plan to sequence')
     publish_trajectory_markers(plan[0])
 
+    if scan:
     # start reconstruction
-    resp = start_recon(start_srv_req)
-    if not resp:
-        rospy.loginfo('robot program: failed to start reconstruction')
-    rospy.loginfo('robot program: started reconstruction')
+        resp = start_recon(start_srv_req)
+        if not resp:
+            rospy.loginfo('robot program: failed to start reconstruction')
+        rospy.loginfo('robot program: started reconstruction')
 
     mgi.sequencer.execute(plan)
 
-    # stop reconstruction
-    resp = stop_recon(stop_srv_req)
-    if not resp:
-        rospy.loginfo('robot program: failed to stop reconstruction')
-    rospy.loginfo('robot program: reconstruction stopped successfully')
+    if scan:
+        # stop reconstruction
+        resp = stop_recon(stop_srv_req)
+        if not resp:
+            rospy.loginfo('robot program: failed to stop reconstruction')
+        rospy.loginfo('robot program: reconstruction stopped successfully')
 
     # return home
     success, plan = mgi.sequencer.plan(
