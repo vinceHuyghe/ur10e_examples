@@ -14,6 +14,7 @@ def robot_program():
 
     # initialize node and moveit commander
     mgi = MoveGroupUtils()
+    mgi.add_ground_cube()
 
     # set and plan to home position
     home = (0.0, -pi / 2.0, pi / 2.0, 0.0, pi / 2.0, -pi / 2.0)

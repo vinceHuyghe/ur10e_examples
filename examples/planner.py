@@ -30,6 +30,9 @@ def robot_program():
     # wait for rviz and moveit to start
     # (only required when using launch file)
     rospy.sleep(3.0)
+    
+    # add collision object
+    mgi.add_ground_cube()
 
     # define robot poses
     home = mgi.create_goal(

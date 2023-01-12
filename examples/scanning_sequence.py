@@ -62,7 +62,7 @@ scan_vel = 0.05
 scan_acc = 0.01
 
 
-scan = True
+scan = False
 
 
 def robot_program():
@@ -78,13 +78,7 @@ def robot_program():
             '/stop_reconstruction', StopReconstruction)
 
     # add table collision table
-    pose = PoseStamped()
-    pose.header.frame_id = mgi.robot.get_planning_frame()
-    pose.header.stamp = rospy.Time.now()
-    pose.pose = Pose(
-            position=Point(0, 0, -0.51), orientation=Quaternion(0, 0, 0, 1)
-        )
-    mgi.scene.add_box('table', pose, (2.0, 2.0, 1.0))
+    mgi.add_ground_cube()
 
     # attach camera
     mgi.attach_camera(ee_name, tcp_pose, size)

@@ -27,6 +27,8 @@ def robot_program():
     # wait for rviz and moveit to start
     # (only required when using launch file)
     rospy.sleep(3.0)
+    
+    mgi.add_ground_cube()
 
     # display pose markers in rviz
     mgi.publish_pose_array([pose_l, pose_r])
