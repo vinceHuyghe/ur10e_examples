@@ -4,20 +4,31 @@ from math import pi
 
 import rospy
 from geometry_msgs.msg import Point, Pose, Quaternion
-from move_group_sequence.move_group_sequence import Circ, Lin, Ptp, Sequence, from_euler
-from trajectory_tools.trajectory_handler import TrajectoryHandler
+
+from move_group_utils.move_group_utils import (MoveGroupUtils,
+                                               publish_trajectory_markers)
+from pilz_robot_program.pilz_robot_program import (Circ, Lin, Ptp, Sequence)
 
 
 def robot_program():
 
-    th = TrajectoryHandler()
+    # initialize node and moveit commander
+    mgi = MoveGroupUtils()
+    mgi.add_ground_cube()
 
-    th.sequencer.plan(Ptp(goal=th.start))
-    th.sequencer.execute()
+    # set and plan to home position
+    home = (0.0, -pi / 2.0, pi / 2.0, 0.0, pi / 2.0, -pi / 2.0)
 
+    success, plan = mgi.sequencer.plan(Ptp(goal=home))[:2]
+    if not success:
+        return rospy.logerr('Failed to plan to home position')
+    mgi.sequencer.execute()
+
+    # initialize sequence
     sequence = Sequence()
 
-    sequence.append(Ptp(goal=th.start))
+    # append commands to sequence
+    sequence.append(Ptp(goal=home))
     sequence.append(
         Ptp(
             goal=Pose(
@@ -85,13 +96,19 @@ def robot_program():
         )
     )
 
-    th.sequencer.plan(sequence)
+    success, plan = mgi.sequencer.plan(sequence)[:2]
 
-    th.display_trajectory()
+    # visualize trajectory
+    publish_trajectory_markers(plan[0])
+    mgi.display_trajectory(plan)
 
-    th.sequencer.execute()
+    if not success:
+        return rospy.logerr('Failed to plan sequence')
+    mgi.sequencer.execute()
+
+    return rospy.loginfo('Robot program completed')
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
 
     robot_program()

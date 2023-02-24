@@ -2,19 +2,21 @@
 import random
 
 import rospy
-from trajectory_tools.srv import RandomPose
+
+from ur10e_examples.srv import RandomPose
 
 
-class RandomPoseSrv(object):
+class RandomPoseSrv():
+
     def __init__(self, name) -> None:
 
         self.name = name
-        rospy.loginfo(f"{self.name} started")
+        rospy.loginfo(f'{self.name} started')
         self.y = (-0.6, 0.6)
         self.z = (0.2, 1)
         self.offset = 0.2
         self.service = rospy.Service(
-            "/random_pose", RandomPose, self.callback_random_pose
+            '/random_pose', RandomPose, self.callback_random_pose
         )
 
     def callback_random_pose(self, req):
@@ -44,8 +46,12 @@ class RandomPoseSrv(object):
         return round(value, 6)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
 
-    rospy.init_node("random_pose_srv")
-    RandomPoseSrv(rospy.get_name)
-    rospy.spin()
+    while not rospy.is_shutdown():
+        try:
+            rospy.init_node('random_pose_srv')
+            RandomPoseSrv(rospy.get_name)
+            rospy.spin()
+        except rospy.ROSInterruptException:
+            pass

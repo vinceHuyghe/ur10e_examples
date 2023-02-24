@@ -1,0 +1,4 @@
+<launch>
+    <include file="$(find ur10e_mosaic_moveit_config)/launch/ur10e_mosaic_iaac_bringup.launch" />
+    <include file="$(find move_group_utils)/launch/mgu_services.launch" />
+</launch>

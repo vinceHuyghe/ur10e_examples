@@ -8,8 +8,15 @@ project(ur10e_examples)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  rospy
+    rospy
+    std_msgs
+    geometry_msgs
+    shape_msgs
+    moveit_commander
+    message_generation
+    actionlib_msgs
 )
+
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -52,24 +59,23 @@ find_package(catkin REQUIRED COMPONENTS
 # )
 
 ## Generate services in the 'srv' folder
-# add_service_files(
-#   FILES
-#   Service1.srv
-#   Service2.srv
-# )
-
+add_service_files(
+  FILES
+  RandomPose.srv
+)
 ## Generate actions in the 'action' folder
-# add_action_files(
-#   FILES
-#   Action1.action
-#   Action2.action
-# )
+add_action_files(
+  DIRECTORY action
+  FILES
+  ExecSeq.action
+)
 
 ## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   std_msgs  # Or other packages containing msgs
-# )
+generate_messages(
+  DEPENDENCIES
+  geometry_msgs
+  actionlib_msgs
+)
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -103,7 +109,9 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES ur10e_examples
-#  CATKIN_DEPENDS rospy
+CATKIN_DEPENDS
+message_runtime
+actionlib_msgs
 #  DEPENDS system_lib
 )
 
@@ -166,16 +174,20 @@ include_directories(
 ## See http://docs.ros.org/melodic/api/catkin/html/howto/format1/building_executables.html
 catkin_install_python(
   PROGRAMS
-  examples/sequencer_example.py
-  examples/move_group_sequence_example.py
-  examples/planner_example.py
-  examples/service_client_example.py
+  examples/sequencer.py
+  examples/sequence.py
+  examples/planner.py
+  examples/service_client.py
   examples/random_pose_service.py
-  examples/goto_action_server_example.py
-  examples/goto_client.py
-  examples/sequence_from_yaml_example.py
-  examples/sequencer_io_example.py
-  examples/subframe_example.py
+  examples/exec_seq_action_server.py
+  examples/exec_seq_action_client.py
+  examples/sequence_from_yaml.py
+  examples/sequencer_io.py
+  examples/subframe.py
+  examples/reconstruction.py
+  examples/mosaic_scanning_sequence.py
+  examples/pick_and_place.py
+  examples/mosaic_pick_and_place_sequence.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
